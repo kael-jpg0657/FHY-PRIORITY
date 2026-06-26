@@ -543,7 +543,30 @@ updateCount();
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js');
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      // Force a check for a newer sw.js every time the app loads
+      reg.update();
+
+      // If a new service worker is found, tell it to take over immediately
+      reg.addEventListener('updatefound', function() {
+        var fresh = reg.installing;
+        if (!fresh) return;
+        fresh.addEventListener('statechange', function() {
+          if (fresh.state === 'installed' && navigator.serviceWorker.controller) {
+            fresh.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+    });
+
+    // Once the new service worker takes control, reload once so the
+    // freshest HTML/CSS/JS is actually used
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
   });
 }
 </script>
