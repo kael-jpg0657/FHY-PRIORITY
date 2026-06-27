@@ -166,7 +166,7 @@ html:not([data-theme="dark"]) .theme-toggle .tt-icon.tt-moon{opacity:.4}
 .date-inp:focus{color:var(--primary-2)}
 .sub-del{background:none;border:none;color:var(--disabled);font-size:11px;cursor:pointer;padding:1px 4px}
 .sub-del:active{color:#ef4444}
-.status-select{font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;border:none;border-radius:14px;padding:3px 3px;outline:none;cursor:pointer;font-family:inherit;text-align:center;-webkit-appearance:none;appearance:none;width:100%;background:transparent;color:var(--text-secondary);transition:background .15s,color .15s}
+.status-select{font-size:6px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;border:none;border-radius:14px;padding:3px 3px;outline:none;cursor:pointer;font-family:inherit;text-align:center;-webkit-appearance:none;appearance:none;width:100%;background:transparent;color:var(--text-secondary);transition:background .15s,color .15s}
 .status-select:focus{box-shadow:0 0 0 2px rgba(0,0,0,.12)}
 .status-select option{color:#1B1F1C;background:#fff}
 .sub-add-row{display:flex;align-items:center;justify-content:center;padding:6px 0;background:var(--surface-alt);border-top:1px solid var(--border);cursor:pointer;font-size:10px;font-weight:700;color:var(--primary-2);gap:4px}
@@ -335,8 +335,7 @@ var STATUS_OPTS = [
   { value: 'For Length',    color: '#8E24AA' },
   { value: 'For Rechecking',color: '#FDD835', dark: true },
   { value: 'Missing Wire',  color: '#E53935' },
-  { value: 'Swapped Wire',  color: '#00897B' },
-  { value: 'For Swap Wire', color: '#C8A97E', dark: true }
+  { value: 'Swapped Wire',  color: '#00897B' }
 ];
 
 function applyStatusStyle(tr, sel, status) {
