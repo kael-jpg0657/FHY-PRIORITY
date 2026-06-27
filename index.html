@@ -171,10 +171,20 @@ html:not([data-theme="dark"]) .theme-toggle .tt-icon.tt-moon{opacity:.4}
 .status-select option{color:#1B1F1C;background:#fff}
 .sub-add-row{display:flex;align-items:center;justify-content:center;padding:6px 0;background:var(--surface-alt);border-top:1px solid var(--border);cursor:pointer;font-size:10px;font-weight:700;color:var(--primary-2);gap:4px}
 .sub-add-row:active{color:var(--primary)}
-.section-label{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--primary);color:var(--on-primary);font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
-.section-label span{opacity:.7;font-size:8.5px}
+.section-label{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--primary);color:var(--on-primary);font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.section-label span{opacity:.7;font-size:7px}
+.section-rm{background:rgba(255,255,255,.18);border:none;color:var(--on-primary);font-size:8px;border-radius:50%;width:14px;height:14px;cursor:pointer;margin-left:6px;flex-shrink:0;line-height:1}
+.section-rm:active{background:rgba(255,255,255,.35)}
 .section-block{border-top:1.5px solid var(--border)}
 .section-block:first-child{border-top:none}
+.add-process-btn{display:flex;align-items:center;justify-content:center;padding:7px 0;background:var(--surface);border-top:1.5px dashed var(--border);cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--primary-2)}
+.add-process-btn:active{color:var(--primary);background:var(--row-hover)}
+.add-process-form{display:flex;align-items:center;gap:5px;padding:6px 8px;background:var(--surface);border-top:1.5px dashed var(--border)}
+.add-process-input{flex:1;font-size:10px;font-family:inherit;font-weight:700;text-transform:uppercase;color:var(--text);background:var(--surface-alt);border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;outline:none}
+.add-process-input:focus{border-color:var(--primary-2)}
+.add-process-ok,.add-process-cancel{flex-shrink:0;width:24px;height:24px;border-radius:6px;border:none;font-size:11px;font-weight:800;cursor:pointer}
+.add-process-ok{background:var(--primary);color:var(--on-primary)}
+.add-process-cancel{background:var(--surface-alt);color:var(--text-secondary);border:1.5px solid var(--border)}
 
 /* FOOTER */
 .footer{display:flex;justify-content:space-between;margin-top:12px;padding:0 2px}
@@ -259,7 +269,7 @@ var cards = [];
 function uid() { return Date.now() + '_' + Math.floor(Math.random() * 1000000); }
 
 function makeCard(serial) {
-  return { id: uid(), serial: serial, priority: '', product: '', qty: '', prodline: '', started: false,
+  return { id: uid(), serial: serial, priority: '', product: '', qty: '', prodline: '', started: false, extraSections: [],
     straight: [], twisted: [], jointing: [], crimping: [], shieldwire: [], soldering: [] };
 }
 
@@ -324,7 +334,9 @@ var STATUS_OPTS = [
   { value: 'For Rework',    color: '#FB8C00' },
   { value: 'For Length',    color: '#8E24AA' },
   { value: 'For Rechecking',color: '#FDD835', dark: true },
-  { value: 'Missing Wires', color: '#E53935' }
+  { value: 'Missing Wire',  color: '#E53935' },
+  { value: 'Swapped Wire',  color: '#00897B' },
+  { value: 'For Swap Wire', color: '#C8A97E', dark: true }
 ];
 
 function applyStatusStyle(tr, sel, status) {
@@ -386,7 +398,7 @@ var SECTIONS = [
   { key: 'soldering', label: 'Soldering' }
 ];
 
-function buildSectionTable(container, card, sectionKey, sectionLabel) {
+function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) {
   var block = document.createElement('div');
   block.className = 'section-block';
 
@@ -400,6 +412,21 @@ function buildSectionTable(container, card, sectionKey, sectionLabel) {
   var cntSpan = document.createElement('span');
   cntSpan.textContent = card[sectionKey].length + ' row(s)';
   labelBar.appendChild(lSpan);
+  if (isCustom) {
+    var rmBtn = document.createElement('button');
+    rmBtn.className = 'section-rm';
+    rmBtn.textContent = '✕';
+    rmBtn.title = 'Remove this process';
+    (function(key) {
+      rmBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        card.extraSections = card.extraSections.filter(function(s) { return s.key !== key; });
+        delete card[key];
+        rebuildSections(container, card);
+      });
+    })(sectionKey);
+    labelBar.appendChild(rmBtn);
+  }
   labelBar.appendChild(cntSpan);
   block.appendChild(labelBar);
 
@@ -518,7 +545,9 @@ function buildSectionTable(container, card, sectionKey, sectionLabel) {
 }
 
 function getCardRowTotal(card) {
-  return SECTIONS.reduce(function(sum, s) { return sum + card[s.key].length; }, 0);
+  var base = SECTIONS.reduce(function(sum, s) { return sum + card[s.key].length; }, 0);
+  var extra = (card.extraSections || []).reduce(function(sum, s) { return sum + (card[s.key] ? card[s.key].length : 0); }, 0);
+  return base + extra;
 }
 
 function refreshCardFinished(container, card) {
@@ -529,11 +558,65 @@ function refreshCardFinished(container, card) {
   if (!finished) cardEl.classList.remove('overlay-peek');
 }
 
+function addCustomProcess(container, card, btn) {
+  if (container.querySelector('.add-process-form')) return;
+
+  var form = document.createElement('div');
+  form.className = 'add-process-form';
+
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'add-process-input';
+  inp.placeholder = 'Pangalan ng process...';
+
+  var okBtn = document.createElement('button');
+  okBtn.className = 'add-process-ok';
+  okBtn.textContent = '✓';
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.className = 'add-process-cancel';
+  cancelBtn.textContent = '✕';
+
+  function commit() {
+    var name = inp.value.trim();
+    if (!name) { rebuildSections(container, card); return; }
+    var key = 'custom_' + uid();
+    card[key] = [];
+    card.extraSections = card.extraSections || [];
+    card.extraSections.push({ key: key, label: name });
+    rebuildSections(container, card);
+  }
+
+  okBtn.addEventListener('click', commit);
+  cancelBtn.addEventListener('click', function() { rebuildSections(container, card); });
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') { rebuildSections(container, card); }
+  });
+
+  form.appendChild(inp);
+  form.appendChild(okBtn);
+  form.appendChild(cancelBtn);
+  btn.replaceWith(form);
+  inp.focus();
+}
+
 function rebuildSections(container, card) {
   container.innerHTML = '';
   SECTIONS.forEach(function(s) {
-    container.appendChild(buildSectionTable(container, card, s.key, s.label));
+    container.appendChild(buildSectionTable(container, card, s.key, s.label, false));
   });
+  (card.extraSections || []).forEach(function(s) {
+    if (!card[s.key]) card[s.key] = [];
+    container.appendChild(buildSectionTable(container, card, s.key, s.label, true));
+  });
+
+  var addProcBtn = document.createElement('div');
+  addProcBtn.className = 'add-process-btn';
+  addProcBtn.textContent = '+ Add Other Process';
+  addProcBtn.addEventListener('click', function() { addCustomProcess(container, card, addProcBtn); });
+  container.appendChild(addProcBtn);
+
   refreshCardFinished(container, card);
 }
 
