@@ -163,7 +163,7 @@ html[data-theme="dark"] .sub-table tbody td:nth-child(2){color:#E9F0E6}
 html[data-theme="dark"] .sub-cell{color:#E9F0E6}
 .sub-cell:focus{background:rgba(46,125,50,.08);border-radius:3px;color:var(--primary)}
 .sub-cell:empty::before{content:'—';color:var(--disabled);text-transform:none}
-.machine-inp{border:none;background:transparent;font-size:8px;font-weight:700;color:#000;font-family:inherit;outline:none;width:100%;text-align:center}
+.machine-inp{border:none;background:transparent;font-size:8px;font-weight:700;color:#000;font-family:inherit;outline:none;width:100%;text-align:center;padding:0;margin:0;height:auto;line-height:1;display:block;-webkit-appearance:none;appearance:none}
 html[data-theme="dark"] .machine-inp{color:#E9F0E6}
 .machine-inp:focus{color:var(--primary-2)}
 .machine-inp::placeholder{color:var(--disabled)}
@@ -486,35 +486,15 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
       tr.appendChild(makeCell(sr.ws, function(v) { sr.ws = v; }));
       tr.appendChild(makeCell(sr.wl, function(v) { sr.wl = v; }));
 
-      // Machine — hidden input with datalist, display span for alignment
+      // Machine
       var machTd = document.createElement('td');
-
-      var machDisplay = document.createElement('span');
-      machDisplay.className = 'sub-cell';
-      machDisplay.style.cssText = 'cursor:pointer';
-      machDisplay.textContent = sr.machine || '';
-      if (!sr.machine) machDisplay.textContent = '';
-
-      var machInp = document.createElement('input');
-      machInp.type = 'text';
-      machInp.setAttribute('list', 'machineList');
-      machInp.style.cssText = 'position:absolute;opacity:0;width:0;height:0;pointer-events:none';
-      machInp.value = sr.machine || '';
-      machInp.addEventListener('input', function() {
-        sr.machine = machInp.value.toUpperCase();
-        machDisplay.textContent = sr.machine;
-      });
-      machInp.addEventListener('change', function() {
-        sr.machine = machInp.value.toUpperCase();
-        machInp.value = sr.machine;
-        machDisplay.textContent = sr.machine;
-      });
-      machDisplay.addEventListener('click', function() {
-        try { machInp.focus(); machInp.click(); } catch(e) {}
-      });
-
-      machTd.appendChild(machInp);
-      machTd.appendChild(machDisplay);
+      var machSpan = document.createElement('span');
+      machSpan.className = 'sub-cell';
+      machSpan.contentEditable = 'true';
+      machSpan.textContent = sr.machine || '';
+      autoUpper(machSpan);
+      machSpan.addEventListener('blur', function() { sr.machine = machSpan.textContent.trim(); saveData(); });
+      machTd.appendChild(machSpan);
       tr.appendChild(machTd);
 
       // Date — hidden input triggered by tapping display span
