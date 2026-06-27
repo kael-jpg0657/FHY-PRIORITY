@@ -134,7 +134,7 @@ html:not([data-theme="dark"]) .theme-toggle .tt-icon.tt-moon{opacity:.4}
 
 /* SUB TABLE */
 .sub-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.sub-table{border-collapse:collapse;width:100%;table-layout:fixed}
+.sub-table{border-collapse:collapse;width:max-content;min-width:100%;table-layout:fixed}
 .sub-table thead tr{background:var(--surface-alt)}
 .sub-table thead th{padding:4px 2px;font-size:6.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--text-secondary);border-bottom:1.5px solid var(--border);text-align:center;white-space:nowrap;overflow:hidden}
 .sub-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
@@ -142,27 +142,33 @@ html:not([data-theme="dark"]) .theme-toggle .tt-icon.tt-moon{opacity:.4}
 .sub-table tbody tr:nth-child(even){background:var(--surface-alt)}
 .sub-table tbody tr:hover{background:var(--row-hover)}
 .sub-table tbody tr.row-done{background:var(--row-done);opacity:.55}
-.sub-table tbody td{padding:4px 2px;font-size:9px;font-weight:600;color:var(--primary);text-align:center;vertical-align:middle;overflow:hidden;white-space:nowrap}
-.sub-table tbody td:nth-child(2){color:var(--text-secondary);font-size:8px}
-/* col widths: done, #, circuit, wt, ws, wl, machine, date, status, del */
-.sub-table th:nth-child(1),.sub-table td:nth-child(1){width:22px}
-.sub-table th:nth-child(2),.sub-table td:nth-child(2){width:18px}
-.sub-table th:nth-child(3),.sub-table td:nth-child(3){width:52px}
-.sub-table th:nth-child(4),.sub-table td:nth-child(4){width:36px}
-.sub-table th:nth-child(5),.sub-table td:nth-child(5){width:30px}
-.sub-table th:nth-child(6),.sub-table td:nth-child(6){width:30px}
-.sub-table th:nth-child(7),.sub-table td:nth-child(7){width:46px}
-.sub-table th:nth-child(8),.sub-table td:nth-child(8){width:72px}
-.sub-table th:nth-child(9),.sub-table td:nth-child(9){width:66px}
-.sub-table th:nth-child(10),.sub-table td:nth-child(10){width:20px}
+.sub-table tbody td{padding:4px 2px;font-size:9px;font-weight:600;color:#000;text-align:center;vertical-align:middle;overflow:hidden;white-space:nowrap}
+.sub-table tbody td:nth-child(2){color:#000;font-size:8px}
+html[data-theme="dark"] .sub-table tbody td{color:#E9F0E6}
+html[data-theme="dark"] .sub-table tbody td:nth-child(2){color:#E9F0E6}
+/* col widths: done, #, circuit, wt, ws, wl, mc, cd, status, del */
+.sub-table th,.sub-table td{white-space:nowrap;overflow:hidden;vertical-align:middle}
+.sub-table th:nth-child(1),.sub-table td:nth-child(1){width:24px}
+.sub-table th:nth-child(2),.sub-table td:nth-child(2){width:20px}
+.sub-table th:nth-child(3),.sub-table td:nth-child(3){width:60px;white-space:normal;word-break:break-word}
+.sub-table th:nth-child(4),.sub-table td:nth-child(4){width:32px}
+.sub-table th:nth-child(5),.sub-table td:nth-child(5){width:32px}
+.sub-table th:nth-child(6),.sub-table td:nth-child(6){width:32px}
+.sub-table th:nth-child(7),.sub-table td:nth-child(7){width:44px}
+.sub-table th:nth-child(8),.sub-table td:nth-child(8){width:62px}
+.sub-table th:nth-child(9),.sub-table td:nth-child(9){width:72px}
+.sub-table th:nth-child(10),.sub-table td:nth-child(10){width:22px}
 .sub-check{width:13px;height:13px;cursor:pointer;accent-color:var(--primary-2)}
-.sub-cell{outline:none;cursor:text;display:block;text-transform:uppercase;min-height:13px}
+.sub-cell{outline:none;cursor:text;display:inline-block;text-transform:uppercase;min-height:13px;white-space:normal;word-break:break-word;color:#000;text-align:center;vertical-align:middle;line-height:1.3}
+html[data-theme="dark"] .sub-cell{color:#E9F0E6}
 .sub-cell:focus{background:rgba(46,125,50,.08);border-radius:3px;color:var(--primary)}
 .sub-cell:empty::before{content:'—';color:var(--disabled);text-transform:none}
-.machine-inp{border:none;background:transparent;font-size:9px;font-weight:700;color:var(--primary);font-family:inherit;outline:none;width:100%;text-align:center}
+.machine-inp{border:none;background:transparent;font-size:8px;font-weight:700;color:#000;font-family:inherit;outline:none;width:100%;text-align:center}
+html[data-theme="dark"] .machine-inp{color:#E9F0E6}
 .machine-inp:focus{color:var(--primary-2)}
 .machine-inp::placeholder{color:var(--disabled)}
-.date-inp{border:none;background:transparent;font-size:6px;font-weight:600;color:var(--text-secondary);font-family:inherit;outline:none;width:100%}
+.date-inp{border:none;background:transparent;font-size:7px;font-weight:700;color:#000;font-family:inherit;outline:none;width:100%;text-align:center}
+html[data-theme="dark"] .date-inp{color:#E9F0E6}
 .date-inp:focus{color:var(--primary-2)}
 .sub-del{background:none;border:none;color:var(--disabled);font-size:11px;cursor:pointer;padding:1px 4px}
 .sub-del:active{color:#ef4444}
@@ -438,7 +444,7 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
 
     var thead = document.createElement('thead');
     var htr = document.createElement('tr');
-    ['✓','#','Circuit','WT','WS','WL','Machine','Completion Date','Status',''].forEach(function(h) {
+    ['✓','#','Circuit','WT','WS','WL','MC','CD','Status',''].forEach(function(h) {
       var th = document.createElement('th');
       th.textContent = h;
       htr.appendChild(th);
@@ -480,27 +486,76 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
       tr.appendChild(makeCell(sr.ws, function(v) { sr.ws = v; }));
       tr.appendChild(makeCell(sr.wl, function(v) { sr.wl = v; }));
 
-      // Machine
+      // Machine — hidden input with datalist, display span for alignment
       var machTd = document.createElement('td');
+
+      var machDisplay = document.createElement('span');
+      machDisplay.className = 'sub-cell';
+      machDisplay.style.cssText = 'cursor:pointer';
+      machDisplay.textContent = sr.machine || '';
+      if (!sr.machine) machDisplay.textContent = '';
+
       var machInp = document.createElement('input');
       machInp.type = 'text';
       machInp.setAttribute('list', 'machineList');
-      machInp.className = 'machine-inp';
-      machInp.value = sr.machine;
-      machInp.placeholder = '—';
-      machInp.addEventListener('input', function() { sr.machine = machInp.value; });
-      machInp.addEventListener('change', function() { machInp.value = machInp.value.toUpperCase(); sr.machine = machInp.value; });
+      machInp.style.cssText = 'position:absolute;opacity:0;width:0;height:0;pointer-events:none';
+      machInp.value = sr.machine || '';
+      machInp.addEventListener('input', function() {
+        sr.machine = machInp.value.toUpperCase();
+        machDisplay.textContent = sr.machine;
+      });
+      machInp.addEventListener('change', function() {
+        sr.machine = machInp.value.toUpperCase();
+        machInp.value = sr.machine;
+        machDisplay.textContent = sr.machine;
+      });
+      machDisplay.addEventListener('click', function() {
+        try { machInp.focus(); machInp.click(); } catch(e) {}
+      });
+
       machTd.appendChild(machInp);
+      machTd.appendChild(machDisplay);
       tr.appendChild(machTd);
 
-      // Date
+      // Date — hidden input triggered by tapping display span
       var dateTd = document.createElement('td');
-      var dateInp = document.createElement('input');
-      dateInp.type = 'datetime-local';
-      dateInp.className = 'date-inp';
-      dateInp.value = sr.compdate || '';
-      dateInp.addEventListener('change', function() { sr.compdate = dateInp.value; });
-      dateTd.appendChild(dateInp);
+
+      var dateDisplay = document.createElement('span');
+      dateDisplay.className = 'date-display';
+      dateDisplay.style.cssText = 'display:block;font-size:7px;font-weight:700;color:#000;text-align:center;white-space:pre;line-height:1.4;cursor:pointer';
+
+      function formatDateDisplay(val) {
+        if (!val) {
+          dateDisplay.textContent = 'MM/DD/YY\nHH:MM';
+          dateDisplay.style.color = 'var(--disabled)';
+          return;
+        }
+        var d = new Date(val);
+        if (isNaN(d)) return;
+        var mo = d.getMonth()+1, dy = d.getDate(), yr = String(d.getFullYear()).slice(-2);
+        var hr = d.getHours(), mn = d.getMinutes();
+        var ampm = hr >= 12 ? 'PM' : 'AM';
+        hr = hr % 12 || 12;
+        dateDisplay.textContent = mo+'/'+dy+'/'+yr+'\n'+hr+':'+(mn<10?'0':'')+mn+' '+ampm;
+        dateDisplay.style.color = '#000';
+      }
+
+      var dateHidden = document.createElement('input');
+      dateHidden.type = 'datetime-local';
+      dateHidden.style.cssText = 'position:absolute;opacity:0;width:0;height:0;pointer-events:none';
+      dateHidden.value = sr.compdate || '';
+      dateHidden.addEventListener('change', function() {
+        sr.compdate = dateHidden.value;
+        formatDateDisplay(dateHidden.value);
+      });
+
+      formatDateDisplay(sr.compdate);
+      dateDisplay.addEventListener('click', function() {
+        try { dateHidden.showPicker(); } catch(e) { dateHidden.click(); }
+      });
+
+      dateTd.appendChild(dateHidden);
+      dateTd.appendChild(dateDisplay);
       tr.appendChild(dateTd);
 
       tr.appendChild(makeStatusCell(tr, sr));
@@ -738,7 +793,7 @@ function addCard() {
 
 function clearAll() {
   cards = [makeCard(1)];
-  buildCards(); updateCount();
+  buildCards(); updateCount(); saveData();
 }
 
 function filterAll() {
@@ -748,14 +803,29 @@ function filterAll() {
   });
 }
 
+function saveData() {
+  try { localStorage.setItem('fhy-cards', JSON.stringify(cards)); } catch(e) {}
+}
+
+function loadData() {
+  try {
+    var saved = localStorage.getItem('fhy-cards');
+    if (saved) { cards = JSON.parse(saved); return true; }
+  } catch(e) {}
+  return false;
+}
+
 function updateCount() {
   document.getElementById('rowCount').textContent = cards.length + ' card' + (cards.length !== 1 ? 's' : '');
 }
 
 // INIT
-cards = [makeCard(1)];
+if (!loadData()) cards = [makeCard(1)];
 buildCards();
 updateCount();
+
+// Auto-save every 2 seconds if data changed
+setInterval(saveData, 2000);
 </script>
 
 <script>
