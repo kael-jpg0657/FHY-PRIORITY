@@ -92,9 +92,16 @@ html:not([data-theme="dark"]) .theme-toggle .tt-icon.tt-moon{opacity:.4}
 
 /* CARDS */
 .cards{display:flex;flex-direction:column;gap:10px}
-.card{position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px var(--shadow)}
+.card{position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.13),0 1.5px 4px rgba(0,0,0,.08);transform:translateY(-2px);border-top-width:5px}
+.card{border-top-color:#000}
 
-/* FINISHED OVERLAY */
+/* SMART MEMORY DROPDOWN */
+.sm-dropdown{position:absolute;z-index:999;background:#fff;border:1.5px solid var(--primary);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-height:160px;overflow-y:auto;min-width:80px;left:0;top:100%}
+html[data-theme="dark"] .sm-dropdown{background:#1e2a1e;border-color:var(--primary-2)}
+.sm-item{padding:6px 10px;font-size:10px;font-weight:700;color:#000;cursor:pointer;text-transform:uppercase;border-bottom:1px solid var(--border)}
+html[data-theme="dark"] .sm-item{color:#E9F0E6}
+.sm-item:last-child{border-bottom:none}
+.sm-item:hover,.sm-item:active{background:rgba(46,125,50,.12)}
 .card-finished-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:5;cursor:pointer;border-radius:12px;background:var(--overlay-tint)}
 .card-finished-overlay .f-hud{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 28px;border-radius:20px;background:var(--overlay-glass);border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 24px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.12);animation:fHudIn .42s cubic-bezier(.34,1.56,.64,1)}
 .card-finished-overlay .f-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;background:radial-gradient(circle at 30% 28%,#66BB6A,#2E7D32 55%,#1B5E20);box-shadow:0 3px 10px rgba(46,125,50,.5),inset 0 1px 1px rgba(255,255,255,.5)}
@@ -105,16 +112,16 @@ html:not([data-theme="dark"]) .theme-toggle .tt-icon.tt-moon{opacity:.4}
 .card.overlay-peek .card-finished-overlay{display:none}
 
 /* CARD TOP — Priority big */
-.card-top{display:flex;align-items:stretch;border-bottom:1.5px solid var(--border)}
-.serial-block{display:flex;align-items:center;justify-content:center;width:28px;background:var(--surface-alt);border-right:1.5px solid var(--border);font-size:10px;font-weight:800;color:var(--text-secondary);flex-shrink:0}
-.priority-block{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 12px;background:var(--surface-alt);position:relative;min-height:62px}
-.p-label{font-size:7px;font-weight:800;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
-.priority-num{font-size:28px;font-weight:900;line-height:1;color:var(--primary-2);min-width:46px;text-align:center;outline:none;cursor:text;border-bottom:2px solid rgba(46,125,50,.3);padding-bottom:2px}
-.priority-num:empty::before{content:'—';color:var(--disabled);font-size:22px}
-.priority-num[data-lvl="1"]{color:#dc2626}
-.priority-num[data-lvl="2"]{color:var(--primary)}
-.priority-num[data-lvl="3"]{color:var(--primary-2)}
-.priority-num[data-lvl="4"]{color:#66BB6A}
+.card-top{display:flex;flex-direction:column;align-items:stretch;border-bottom:1.5px solid var(--border)}
+.serial-block{display:flex;align-items:center;justify-content:center;width:100%;padding:4px 0;background:var(--surface-alt);border-bottom:1px solid var(--border);font-size:10px;font-weight:800;color:var(--text-secondary)}
+.priority-block{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 12px;background:var(--surface-alt);position:relative;min-height:54px}
+.p-label{font-size:7px;font-weight:800;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.priority-num{font-size:28px;font-weight:900;line-height:1;color:#fff;min-width:60px;text-align:center;outline:none;cursor:text;padding:6px 14px;border-radius:10px;background:var(--primary);box-shadow:0 3px 10px rgba(27,94,32,.35)}
+.priority-num:empty::before{content:'—';color:rgba(255,255,255,.5);font-size:22px}
+.priority-num[data-lvl="1"]{background:#dc2626;box-shadow:0 3px 10px rgba(220,38,38,.4)}
+.priority-num[data-lvl="2"]{background:#e65100;box-shadow:0 3px 10px rgba(230,81,0,.4)}
+.priority-num[data-lvl="3"]{background:var(--primary);box-shadow:0 3px 10px rgba(27,94,32,.35)}
+.priority-num[data-lvl="4"]{background:#388E3C;box-shadow:0 3px 10px rgba(56,142,60,.3)}
 .del-card-btn{position:absolute;top:5px;right:7px;background:none;border:none;color:var(--disabled);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1}
 .del-card-btn:active{color:#ef4444}
 
@@ -250,9 +257,10 @@ html[data-theme="dark"] .date-inp{color:#E9F0E6}
   </div>
   <div class="action-bar">
     <button class="btn btn-primary" onclick="addCard()">+ Add Row</button>
-    <button class="btn btn-ghost" onclick="window.print()">Print</button>
+    <button class="btn btn-ghost" onclick="addNote()">📝 Notes</button>
     <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
   </div>
+  <div id="notesList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
   <div class="cards" id="cardContainer"></div>
   <div class="footer">
     <span id="rowCount"></span>
@@ -381,13 +389,102 @@ function makeStatusCell(tr, sr) {
   return td;
 }
 
-function makeCell(value, onBlur) {
+/* ======= SMART MEMORY ======= */
+var SM_KEY = 'fhy-smart-memory';
+var smMemory = {};
+
+function smLoad() {
+  try { smMemory = JSON.parse(localStorage.getItem(SM_KEY) || '{}'); } catch(e) { smMemory = {}; }
+}
+
+function smSave(field, value) {
+  if (!value || value.length < 1) return;
+  value = value.toUpperCase().trim();
+  if (!smMemory[field]) smMemory[field] = [];
+  if (smMemory[field].indexOf(value) === -1) {
+    smMemory[field].unshift(value);
+    if (smMemory[field].length > 30) smMemory[field].pop();
+    try { localStorage.setItem(SM_KEY, JSON.stringify(smMemory)); } catch(e) {}
+  } else {
+    // Move to top (most recent)
+    smMemory[field] = [value].concat(smMemory[field].filter(function(v){ return v !== value; }));
+    try { localStorage.setItem(SM_KEY, JSON.stringify(smMemory)); } catch(e) {}
+  }
+}
+
+function smSuggest(field, query) {
+  var list = smMemory[field] || [];
+  if (!query) return list.slice(0, 8);
+  query = query.toUpperCase();
+  return list.filter(function(v){ return v.indexOf(query) === 0; }).slice(0, 8)
+    .concat(list.filter(function(v){ return v.indexOf(query) > 0; }).slice(0, 4));
+}
+
+var smActiveDropdown = null;
+
+function smClose() {
+  if (smActiveDropdown) { smActiveDropdown.remove(); smActiveDropdown = null; }
+}
+
+function smAttach(span, field) {
+  span.style.position = 'relative';
+  var td = span.parentElement;
+
+  function showDropdown() {
+    smClose();
+    var query = span.textContent.trim();
+    var suggestions = smSuggest(field, query);
+    if (!suggestions.length) return;
+
+    var dd = document.createElement('div');
+    dd.className = 'sm-dropdown';
+    suggestions.forEach(function(s) {
+      var item = document.createElement('div');
+      item.className = 'sm-item';
+      item.textContent = s;
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        span.textContent = s;
+        smClose();
+        span.blur();
+      });
+      item.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        span.textContent = s;
+        smClose();
+        span.blur();
+      });
+      dd.appendChild(item);
+    });
+
+    if (!td) td = span.closest('td');
+    if (td) { td.style.position = 'relative'; td.appendChild(dd); }
+    smActiveDropdown = dd;
+  }
+
+  span.addEventListener('focus', function() { setTimeout(showDropdown, 100); });
+  span.addEventListener('input', showDropdown);
+  span.addEventListener('blur', function() {
+    setTimeout(smClose, 200);
+    var val = span.textContent.trim();
+    if (val) smSave(field, val);
+  });
+}
+
+smLoad();
+
+function makeCell(value, onBlur, field) {
   var span = document.createElement('span');
   span.className = 'sub-cell';
   span.contentEditable = 'true';
   span.textContent = value || '';
   autoUpper(span);
-  span.addEventListener('blur', function() { onBlur(span.textContent.trim()); });
+  span.addEventListener('blur', function() {
+    var v = span.textContent.trim();
+    if (field) smSave(field, v);
+    onBlur(v);
+  });
+  if (field) smAttach(span, field);
   var td = document.createElement('td');
   td.appendChild(span);
   return td;
@@ -407,15 +504,24 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
   var block = document.createElement('div');
   block.className = 'section-block';
 
-  // Section label bar
+  // Section label bar — tap to add row
   var labelBar = document.createElement('div');
   labelBar.className = 'section-label';
+  labelBar.style.cursor = 'pointer';
+  labelBar.title = 'Tap to add row';
+
   var lSpan = document.createElement('span');
   lSpan.style.opacity = '1';
   lSpan.style.fontWeight = '800';
   lSpan.textContent = sectionLabel;
+
   var cntSpan = document.createElement('span');
   cntSpan.textContent = card[sectionKey].length + ' row(s)';
+
+  var addIcon = document.createElement('span');
+  addIcon.textContent = '＋';
+  addIcon.style.cssText = 'font-size:13px;font-weight:700;margin-left:4px;opacity:0.7';
+
   labelBar.appendChild(lSpan);
   if (isCustom) {
     var rmBtn = document.createElement('button');
@@ -433,6 +539,18 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
     labelBar.appendChild(rmBtn);
   }
   labelBar.appendChild(cntSpan);
+  labelBar.appendChild(addIcon);
+
+  // Tap label bar = add row
+  (function(key) {
+    labelBar.addEventListener('click', function() {
+      card.started = true;
+      card[key].push(makeSubRow());
+      rebuildSections(container, card);
+      saveData();
+    });
+  })(sectionKey);
+
   block.appendChild(labelBar);
 
   // Table
@@ -481,10 +599,10 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
       numTd.textContent = idx + 1;
       tr.appendChild(numTd);
 
-      tr.appendChild(makeCell(sr.circuit, function(v) { sr.circuit = v; }));
-      tr.appendChild(makeCell(sr.wires, function(v) { sr.wires = v; }));
-      tr.appendChild(makeCell(sr.ws, function(v) { sr.ws = v; }));
-      tr.appendChild(makeCell(sr.wl, function(v) { sr.wl = v; }));
+      tr.appendChild(makeCell(sr.circuit, function(v) { sr.circuit = v; }, 'circuit'));
+      tr.appendChild(makeCell(sr.wires, function(v) { sr.wires = v; }, 'wt'));
+      tr.appendChild(makeCell(sr.ws, function(v) { sr.ws = v; }, 'ws'));
+      tr.appendChild(makeCell(sr.wl, function(v) { sr.wl = v; }, 'wl'));
 
       // Machine
       var machTd = document.createElement('td');
@@ -494,6 +612,7 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
       machSpan.textContent = sr.machine || '';
       autoUpper(machSpan);
       machSpan.addEventListener('blur', function() { sr.machine = machSpan.textContent.trim(); saveData(); });
+      smAttach(machSpan, 'mc');
       machTd.appendChild(machSpan);
       tr.appendChild(machTd);
 
@@ -561,19 +680,6 @@ function buildSectionTable(container, card, sectionKey, sectionLabel, isCustom) 
     scrollDiv.appendChild(tbl);
     block.appendChild(scrollDiv);
   }
-
-  // Add row button
-  var addBtn = document.createElement('div');
-  addBtn.className = 'sub-add-row';
-  addBtn.textContent = '+ Add ' + sectionLabel;
-  (function(key) {
-    addBtn.addEventListener('click', function() {
-      card.started = true;
-      card[key].push(makeSubRow());
-      rebuildSections(container, card);
-    });
-  })(sectionKey);
-  block.appendChild(addBtn);
 
   return block;
 }
@@ -806,6 +912,56 @@ updateCount();
 
 // Auto-save every 2 seconds if data changed
 setInterval(saveData, 2000);
+
+/* ======= NOTES ======= */
+var notes = [];
+try { notes = JSON.parse(localStorage.getItem('fhy-notes') || '[]'); } catch(e) { notes = []; }
+
+function saveNotes() {
+  try { localStorage.setItem('fhy-notes', JSON.stringify(notes)); } catch(e) {}
+}
+
+function renderNotes() {
+  var list = document.getElementById('notesList');
+  list.innerHTML = '';
+  notes.forEach(function(note, i) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:flex-start;gap:6px;background:#F0F0F0;border:1.5px solid #BDBDBD;border-radius:10px;padding:8px 10px;position:relative';
+
+    var txt = document.createElement('div');
+    txt.contentEditable = 'true';
+    txt.style.cssText = 'flex:1;font-size:12px;font-weight:600;color:#333;outline:none;min-height:18px;word-break:break-word;white-space:pre-wrap';
+    txt.textContent = note;
+    txt.addEventListener('blur', function() {
+      notes[i] = txt.textContent.trim();
+      saveNotes();
+    });
+
+    var xBtn = document.createElement('button');
+    xBtn.textContent = '✕';
+    xBtn.style.cssText = 'background:none;border:none;font-size:14px;cursor:pointer;color:#999;line-height:1;padding:0;flex-shrink:0';
+    xBtn.addEventListener('click', function() {
+      notes.splice(i, 1);
+      saveNotes();
+      renderNotes();
+    });
+
+    wrap.appendChild(txt);
+    wrap.appendChild(xBtn);
+    list.appendChild(wrap);
+  });
+}
+
+function addNote() {
+  notes.push('');
+  saveNotes();
+  renderNotes();
+  // focus the new note
+  var items = document.getElementById('notesList').children;
+  if (items.length) items[items.length - 1].querySelector('[contenteditable]').focus();
+}
+
+renderNotes();
 </script>
 
 <script>
