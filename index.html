@@ -102,6 +102,14 @@ html[data-theme="dark"] .sm-dropdown{background:#1e2a1e;border-color:var(--prima
 html[data-theme="dark"] .sm-item{color:#E9F0E6}
 .sm-item:last-child{border-bottom:none}
 .sm-item:hover,.sm-item:active{background:rgba(46,125,50,.12)}
+/* CARD TABS */
+.card-tab-bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:10px 10px 6px;border-bottom:1.5px solid var(--border);background:var(--surface-alt)}
+.card-tab{border-radius:16px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text-secondary);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.card-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.card-tab-add{background:none;border:1.5px dashed var(--primary);color:var(--primary);border-radius:16px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer}
+.card-tab-x{font-size:13px;opacity:0.8;cursor:pointer;padding:4px;margin:-4px -2px -4px 0;line-height:1}
+.card-tab-label{outline:none}
+
 .card-finished-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:5;cursor:pointer;border-radius:12px;background:var(--overlay-tint)}
 .card-finished-overlay .f-hud{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 28px;border-radius:20px;background:var(--overlay-glass);border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 24px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.12);animation:fHudIn .42s cubic-bezier(.34,1.56,.64,1)}
 .card-finished-overlay .f-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;background:radial-gradient(circle at 30% 28%,#66BB6A,#2E7D32 55%,#1B5E20);box-shadow:0 3px 10px rgba(46,125,50,.5),inset 0 1px 1px rgba(255,255,255,.5)}
@@ -261,6 +269,22 @@ html[data-theme="dark"] .date-inp{color:#E9F0E6}
     <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
   </div>
   <div id="notesList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+
+  <!-- LINE TABS -->
+  <div id="lineTabBar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px"></div>
+
+  <!-- Custom delete confirm modal -->
+  <div id="deleteConfirmOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:14px;padding:20px;max-width:300px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.3)">
+      <div style="font-size:14px;font-weight:800;color:#222;margin-bottom:6px">Delete line tab?</div>
+      <div id="deleteConfirmMsg" style="font-size:12px;color:#666;margin-bottom:16px;line-height:1.4"></div>
+      <div style="display:flex;gap:8px">
+        <button id="deleteConfirmCancel" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #ccc;background:#fff;color:#333;font-weight:700;font-size:12px;cursor:pointer">Cancel</button>
+        <button id="deleteConfirmOk" style="flex:1;padding:10px;border-radius:8px;border:none;background:#C62828;color:#fff;font-weight:700;font-size:12px;cursor:pointer">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <div class="cards" id="cardContainer"></div>
   <div class="footer">
     <span id="rowCount"></span>
@@ -772,7 +796,26 @@ function buildCards() {
   var container = document.getElementById('cardContainer');
   container.innerHTML = '';
 
-  cards.forEach(function(card) {
+  if (typeof activeLineTab === 'undefined' || activeLineTab === 'all') {
+    var msg = document.createElement('div');
+    msg.style.cssText = 'text-align:center;padding:40px 16px;color:var(--text-secondary);font-size:13px;font-weight:600;background:var(--surface-alt);border-radius:12px;border:1.5px dashed var(--border)';
+    msg.textContent = lineTabs.length
+      ? 'Select a line tab above to view its cards.'
+      : 'Tap "＋" above to create a line tab (e.g. B01C) to start adding cards.';
+    container.appendChild(msg);
+    return;
+  }
+
+  var visibleCards = cards.filter(function(c) { return c.lineTab === activeLineTab; });
+
+  if (!visibleCards.length) {
+    var msg2 = document.createElement('div');
+    msg2.style.cssText = 'text-align:center;padding:40px 16px;color:var(--text-secondary);font-size:13px;font-weight:600;background:var(--surface-alt);border-radius:12px;border:1.5px dashed var(--border)';
+    msg2.textContent = 'No cards in "' + activeLineTab + '" yet. Tap "+ Add Row" to create one.';
+    container.appendChild(msg2);
+  }
+
+  visibleCards.forEach(function(card) {
     var el = document.createElement('div');
     el.className = 'card';
     el.dataset.id = card.id;
@@ -871,8 +914,14 @@ function buildCards() {
 function renumber() { cards.forEach(function(c, i) { c.serial = i + 1; }); }
 
 function addCard() {
-  cards.push(makeCard(cards.length + 1));
-  buildCards(); updateCount();
+  if (typeof activeLineTab === 'undefined' || activeLineTab === 'all') {
+    alert('Please select or create a line tab first (e.g. B01C) before adding a card.');
+    return;
+  }
+  var newCard = makeCard(cards.length + 1);
+  newCard.lineTab = activeLineTab;
+  cards.push(newCard);
+  buildCards(); updateCount(); saveData();
   var els = document.querySelectorAll('.card');
   if (els.length) els[els.length - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -905,13 +954,32 @@ function updateCount() {
   document.getElementById('rowCount').textContent = cards.length + ' card' + (cards.length !== 1 ? 's' : '');
 }
 
+/* ======= LINE TABS (global card filter) ======= */
+var lineTabs = [];
+var activeLineTab = 'all';
+try { lineTabs = JSON.parse(localStorage.getItem('fhy-line-tabs') || '[]'); } catch(e) { lineTabs = []; }
+
+function customConfirm(message, onConfirm) {
+  var overlay = document.getElementById('deleteConfirmOverlay');
+  document.getElementById('deleteConfirmMsg').textContent = message;
+  overlay.style.display = 'flex';
+  var okBtn = document.getElementById('deleteConfirmOk');
+  var cancelBtn = document.getElementById('deleteConfirmCancel');
+  function cleanup() {
+    overlay.style.display = 'none';
+    okBtn.removeEventListener('click', onOk);
+    cancelBtn.removeEventListener('click', onCancel);
+  }
+  function onOk() { cleanup(); onConfirm(); }
+  function onCancel() { cleanup(); }
+  okBtn.addEventListener('click', onOk);
+  cancelBtn.addEventListener('click', onCancel);
+}
+
 // INIT
 if (!loadData()) cards = [makeCard(1)];
 buildCards();
 updateCount();
-
-// Auto-save every 2 seconds if data changed
-setInterval(saveData, 2000);
 
 /* ======= NOTES ======= */
 var notes = [];
@@ -927,25 +995,16 @@ function renderNotes() {
   notes.forEach(function(note, i) {
     var wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;align-items:flex-start;gap:6px;background:#F0F0F0;border:1.5px solid #BDBDBD;border-radius:10px;padding:8px 10px;position:relative';
-
     var txt = document.createElement('div');
     txt.contentEditable = 'true';
     txt.style.cssText = 'flex:1;font-size:12px;font-weight:600;color:#333;outline:none;min-height:18px;word-break:break-word;white-space:pre-wrap';
     txt.textContent = note;
-    txt.addEventListener('blur', function() {
-      notes[i] = txt.textContent.trim();
-      saveNotes();
-    });
-
+    autoUpper(txt);
+    txt.addEventListener('blur', function() { notes[i] = txt.textContent.trim(); saveNotes(); });
     var xBtn = document.createElement('button');
     xBtn.textContent = '✕';
-    xBtn.style.cssText = 'background:none;border:none;font-size:14px;cursor:pointer;color:#999;line-height:1;padding:0;flex-shrink:0';
-    xBtn.addEventListener('click', function() {
-      notes.splice(i, 1);
-      saveNotes();
-      renderNotes();
-    });
-
+    xBtn.style.cssText = 'background:none;border:none;font-size:16px;cursor:pointer;color:#888;line-height:1;padding:6px;margin:-6px -4px -6px 0;flex-shrink:0';
+    xBtn.addEventListener('click', function() { notes.splice(i, 1); saveNotes(); renderNotes(); });
     wrap.appendChild(txt);
     wrap.appendChild(xBtn);
     list.appendChild(wrap);
@@ -956,12 +1015,124 @@ function addNote() {
   notes.push('');
   saveNotes();
   renderNotes();
-  // focus the new note
   var items = document.getElementById('notesList').children;
   if (items.length) items[items.length - 1].querySelector('[contenteditable]').focus();
 }
 
 renderNotes();
+
+function saveLineTabs() {
+  try { localStorage.setItem('fhy-line-tabs', JSON.stringify(lineTabs)); } catch(e) {}
+}
+
+function renderLineTabs() {
+  var bar = document.getElementById('lineTabBar');
+  bar.innerHTML = '';
+
+  var allBtn = document.createElement('button');
+  allBtn.className = 'card-tab' + (activeLineTab === 'all' ? ' active' : '');
+  allBtn.textContent = 'All';
+  allBtn.addEventListener('click', function() { activeLineTab = 'all'; renderLineTabs(); buildCards(); });
+  bar.appendChild(allBtn);
+
+  lineTabs.forEach(function(tab, i) {
+    var btn = document.createElement('button');
+    btn.className = 'card-tab' + (activeLineTab === tab ? ' active' : '');
+
+    var label = document.createElement('span');
+    label.className = 'card-tab-label';
+    label.contentEditable = 'false';
+    label.textContent = tab;
+    autoUpper(label);
+
+    var tapTimer = null;
+    var pressTimer = null;
+    var longPressFired = false;
+
+    function startPress(e) {
+      longPressFired = false;
+      pressTimer = setTimeout(function() {
+        longPressFired = true;
+        if (navigator.vibrate) navigator.vibrate(40);
+        customConfirm('Delete line tab "' + tab + '"? Cards inside will stay but become unassigned.', function() {
+          lineTabs.splice(i, 1);
+          if (activeLineTab === tab) activeLineTab = 'all';
+          saveLineTabs(); renderLineTabs(); buildCards();
+        });
+      }, 550);
+    }
+    function cancelPress() {
+      clearTimeout(pressTimer);
+    }
+
+    btn.addEventListener('touchstart', startPress, { passive: true });
+    btn.addEventListener('touchend', cancelPress);
+    btn.addEventListener('touchmove', cancelPress);
+    btn.addEventListener('touchcancel', cancelPress);
+    btn.addEventListener('mousedown', startPress);
+    btn.addEventListener('mouseup', cancelPress);
+    btn.addEventListener('mouseleave', cancelPress);
+
+    btn.addEventListener('click', function(e) {
+      if (longPressFired) {
+        longPressFired = false;
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (tapTimer) {
+        clearTimeout(tapTimer); tapTimer = null;
+        label.contentEditable = 'true'; label.focus();
+        var r = document.createRange(); r.selectNodeContents(label);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      } else {
+        tapTimer = setTimeout(function() {
+          tapTimer = null; activeLineTab = tab; renderLineTabs(); buildCards();
+        }, 250);
+      }
+    });
+    label.addEventListener('blur', function() {
+      label.contentEditable = 'false';
+      var newName = label.textContent.trim().toUpperCase() || tab;
+      cards.forEach(function(c) { if (c.lineTab === tab) c.lineTab = newName; });
+      if (activeLineTab === tab) activeLineTab = newName;
+      lineTabs[i] = newName; label.textContent = newName;
+      saveLineTabs(); saveData(); renderLineTabs(); buildCards();
+    });
+    label.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); label.blur(); } });
+
+    btn.appendChild(label);
+    bar.appendChild(btn);
+  });
+
+  var addBtn = document.createElement('button');
+  addBtn.className = 'card-tab-add';
+  addBtn.textContent = '＋';
+  addBtn.addEventListener('click', function() {
+    var name = 'LINE' + (lineTabs.length + 1);
+    lineTabs.push(name); activeLineTab = name;
+    saveLineTabs(); renderLineTabs(); buildCards();
+    setTimeout(function() {
+      var btns = bar.querySelectorAll('.card-tab');
+      var last = btns[btns.length - 1];
+      if (last) {
+        var lbl = last.querySelector('.card-tab-label');
+        if (lbl) {
+          lbl.contentEditable = 'true'; lbl.focus();
+          var r = document.createRange(); r.selectNodeContents(lbl);
+          var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        }
+      }
+    }, 30);
+  });
+  bar.appendChild(addBtn);
+}
+
+renderLineTabs();
+buildCards();
+updateCount();
+
+
 </script>
 
 <script>
